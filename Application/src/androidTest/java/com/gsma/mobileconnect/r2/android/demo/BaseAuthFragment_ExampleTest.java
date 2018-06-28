@@ -42,6 +42,7 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
 
     @Before
     public void setUp() {
+        //
         //MockitoAnnotations.initMocks(this);
         mainActivity = mActivityRule.getActivity();
     }
