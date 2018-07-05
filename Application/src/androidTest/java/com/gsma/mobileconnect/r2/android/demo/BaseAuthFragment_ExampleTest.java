@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
@@ -64,24 +65,20 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
     }
 
     @Test
-    public void connectMobileWithoutDiscovery_Test() throws Exception {
+    public void connectMobileDemo_Test() throws Exception {
         assertNotNull(mainActivity);
         FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragment = new BaseAuthFragment_ExampleTest();
-        MobileConnectAndroidView as = BaseAuthFragment.mobileConnectAndroidView;
+        MobileConnectAndroidView viewBeforeMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
         fragmentTransaction.add(fragment, null);
         fragmentTransaction.commit();
 
         getInstrumentation().waitForIdleSync();
 
-        //fragment.connectMobileDemo();
-        MobileConnectAndroidView as2 = BaseAuthFragment.mobileConnectAndroidView;
-        assertThat(as, is(as2));
-        //Assert.assertNotEquals(as, as2);
-
-        MobileConnect mockedMobileConnect = mock(MobileConnect.class);
-        verify(mockedMobileConnect).getMobileConnectWebInterface();
+        fragment.connectMobileDemo();
+        MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
+        Assert.assertNotEquals(viewBeforeMethodCalling, viewAfterMethodCalling);
     }
 
     @Test
@@ -100,6 +97,27 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
         //MobileConnectConfig mockedMobileConnect = mock(MobileConnectConfig.class);
 
         fragment.connectMobileWithoutDiscovery();
+        getInstrumentation().waitForIdleSync();
+        Field asd = fragment.getClass().getSuperclass().getDeclaredField("mobileConnectConfig");
+        Assert.assertNotEquals(asd, asd2);
+    }
+
+    @Test
+    public void connectMobileWithoutDiscovery_callingGetWebInterfaceTest2() throws Exception {
+        assertNotNull(mainActivity);
+        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragment = new BaseAuthFragment_ExampleTest();
+
+        Field asd2 = fragment.getClass().getSuperclass().getDeclaredField("mobileConnectConfig");
+        fragmentTransaction.add(fragment, null);
+        fragmentTransaction.commit();
+        getInstrumentation().waitForIdleSync();
+
+        MobileConnectConfig mockedMobileConnect = mock(MobileConnectConfig.class);
+
+        fragment.connectMobileWithoutDiscovery();
+        getInstrumentation().waitForIdleSync();
         Field asd = fragment.getClass().getSuperclass().getDeclaredField("mobileConnectConfig");
         Assert.assertNotEquals(asd, asd2);
     }
