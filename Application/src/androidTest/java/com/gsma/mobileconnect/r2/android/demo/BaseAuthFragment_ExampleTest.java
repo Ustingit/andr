@@ -10,6 +10,7 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.gsma.mobileconnect.r2.MobileConnect;
 import com.gsma.mobileconnect.r2.MobileConnectConfig;
+import com.gsma.mobileconnect.r2.MobileConnectStatus;
 import com.gsma.mobileconnect.r2.android.demo.activity.MainActivity;
 import com.gsma.mobileconnect.r2.android.demo.fragments.BaseAuthFragment;
 import com.gsma.mobileconnect.r2.android.main.MobileConnectAndroidView;
@@ -22,10 +23,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URI;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
@@ -46,11 +49,21 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
     @Override
     public void onComplete(DiscoveryResponse discoveryResponse) {}
 
+    @Override
+    public void handleRedirect(final MobileConnectStatus mobileConnectStatus){
+        super.handleRedirect(mobileConnectStatus);
+    }
+
     @Rule
     public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule<>(MainActivity.class);
-    public UiThreadTestRule threadRule= new UiThreadTestRule();
     private MainActivity mainActivity = null;
     BaseAuthFragment fragment = null;
+
+    @Rule
+    public UiThreadTestRule uiThreadTestRule = new UiThreadTestRule();
+
+    @Mock
+    MobileConnectStatus mobileConnectStatus;
 
     @Before
     public void setUp() {
@@ -65,7 +78,7 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
     }
 
     @Test
-    public void connectMobileDemo_Test() throws Exception {
+    public void connectMobileDemo_Test() throws Throwable {
         assertNotNull(mainActivity);
         FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -76,10 +89,120 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
 
         getInstrumentation().waitForIdleSync();
 
-        fragment.connectMobileDemo();
+        uiThreadTestRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                fragment.connectMobileDemo();
+            }
+        });
+
         MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
         Assert.assertNotEquals(viewBeforeMethodCalling, viewAfterMethodCalling);
     }
+
+    @Test
+    public void connectMobileWithoutDiscovery_Test() throws Throwable {
+        assertNotNull(mainActivity);
+        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragment = new BaseAuthFragment_ExampleTest();
+        MobileConnectAndroidView viewBeforeMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
+        fragmentTransaction.add(fragment, null);
+        fragmentTransaction.commit();
+
+        getInstrumentation().waitForIdleSync();
+
+        uiThreadTestRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                fragment.connectMobileWithoutDiscovery();
+            }
+        });
+
+        MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
+        Assert.assertNotEquals(viewBeforeMethodCalling, viewAfterMethodCalling);
+    }
+
+    @Test
+    public void onStart_Test() throws Throwable {
+        assertNotNull(mainActivity);
+        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragment = new BaseAuthFragment_ExampleTest();
+        fragmentTransaction.add(fragment, null);
+        fragmentTransaction.commit();
+
+        getInstrumentation().waitForIdleSync();
+        uiThreadTestRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                fragment.onStart();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
+        boolean isRegistered = viewAfterMethodCalling.isRegistered();
+        Assert.assertTrue(isRegistered);
+    }
+
+    @Test
+    public void onStop_Test() throws Throwable {
+        assertNotNull(mainActivity);
+        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragment = new BaseAuthFragment_ExampleTest();
+        fragmentTransaction.add(fragment, null);
+        fragmentTransaction.commit();
+
+        getInstrumentation().waitForIdleSync();
+        uiThreadTestRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                fragment.onStop();
+            }
+        });
+        getInstrumentation().waitForIdleSync();
+
+        MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
+        boolean isRegistered = viewAfterMethodCalling.isRegistered();
+        Assert.assertFalse(isRegistered);
+    }
+
+    @Test
+    public void handleRedirect_Test() throws Throwable {
+        assertNotNull(mainActivity);
+        FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragment = new ClassForTesting();
+        fragmentTransaction.add(fragment, null);
+        fragmentTransaction.commit();
+        when(mobileConnectStatus.getResponseType())
+                .thenThrow(new NullPointerException());
+
+
+        MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
+        boolean isRegistered = viewAfterMethodCalling.isRegistered();
+        Assert.assertFalse(isRegistered);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Test
     public void connectMobileWithoutDiscovery_callingGetWebInterfaceTest() throws Exception {

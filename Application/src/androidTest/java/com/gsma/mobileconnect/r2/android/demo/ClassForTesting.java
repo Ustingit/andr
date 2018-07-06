@@ -23,9 +23,9 @@ public class ClassForTesting extends BaseAuthFragment {
     public void onComplete(DiscoveryResponse discoveryResponse) {
     }
 
-    MobileConnectStatus mobileConnectConfig = super.mobileConnectStatus;
-
-    private void setupMobileConnect (boolean isWithoutDiscovery) {
-
+    @Override
+    public void handleRedirect(final MobileConnectStatus mobileConnectStatus){
+        super.handleRedirect(mobileConnectStatus);
     }
+
 }
