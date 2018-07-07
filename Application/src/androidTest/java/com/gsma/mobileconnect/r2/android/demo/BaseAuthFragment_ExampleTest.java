@@ -174,16 +174,22 @@ public class BaseAuthFragment_ExampleTest extends BaseAuthFragment{
         assertNotNull(mainActivity);
         FragmentManager fragmentManager = mainActivity.getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragment = new ClassForTesting();
+        final ClassForTesting fragment = new ClassForTesting();
         fragmentTransaction.add(fragment, null);
         fragmentTransaction.commit();
+
         when(mobileConnectStatus.getResponseType())
-                .thenThrow(new NullPointerException());
+                .thenReturn(MobileConnectStatus.ResponseType.START_AUTHENTICATION);
 
+        when(mobileConnectStatus.getErrorMessage())
+                .thenReturn("some error here from unit test");
 
-        MobileConnectAndroidView viewAfterMethodCalling = BaseAuthFragment.mobileConnectAndroidView;
-        boolean isRegistered = viewAfterMethodCalling.isRegistered();
-        Assert.assertFalse(isRegistered);
+        uiThreadTestRule.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                fragment.handleRedirect(mobileConnectStatus);
+            }
+        });
     }
 
 
